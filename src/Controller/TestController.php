@@ -2,8 +2,9 @@
 
 namespace App\Controller;
 
-use App\Service\HttpClient;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpClient\ScopingHttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Swoole\Coroutine\WaitGroup;
@@ -59,17 +60,25 @@ class TestController extends AbstractController
     }
 
     #[Route('/test-complex', name: 'test-complex', format: 'json')]
-    public function testComplex(HttpClient $httpClient): JsonResponse
+    public function testComplex(): JsonResponse
     {
         /*
-php_1  | Fatal error: Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:176
+php_1  | PHP Fatal error:  Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:176
 php_1  | Stack trace:
 php_1  | #0 /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php(176): curl_multi_add_handle(Object(CurlMultiHandle), Object(CurlHandle))
 php_1  | #1 /var/www/app/vendor/symfony/http-client/CurlHttpClient.php(318): Symfony\Component\HttpClient\Response\CurlResponse->__construct(Object(Symfony\Component\HttpClient\Internal\CurlClientState), Object(CurlHandle), Array, NULL, 'GET', Object(Closure), 479232)
 php_1  | #2 /var/www/app/vendor/symfony/http-client/ScopingHttpClient.php(93): Symfony\Component\HttpClient\CurlHttpClient->request('GET', 'https://httpbin...', Array)
-php_1  | #3 /var/www/app/src/Service/HttpClient.php(25): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
-php_1  | #4 /var/www/app/src/Controller/TestController.php(73): App\Service\HttpClient->get(1)
+php_1  | #3 /var/www/app/src/Controller/TestController.php(91): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
+php_1  | #4 {main}
+php_1  |   thrown in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php on line 176
          */
+
+        $httpClient = ScopingHttpClient::forBaseUri(HttpClient::create(), 'https://httpbin.org', [
+            'timeout' => 2,
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ]);
 
         \Swoole\Runtime::enableCoroutine(true, \SWOOLE_HOOK_ALL);
         $wg = new WaitGroup();
@@ -80,7 +89,7 @@ php_1  | #4 /var/www/app/src/Controller/TestController.php(73): App\Service\Http
         foreach ([1, 1, 1, 1] as $delay) {
             go(function () use ($wg, $httpClient, $delay, &$results) {
                 $wg->add();
-                $results[] = $httpClient->get($delay);
+                $results[] = $httpClient->request('GET', '/delay/'.$delay)->toArray();
                 $wg->done();
             });
         }
@@ -96,7 +105,7 @@ php_1  | #4 /var/www/app/src/Controller/TestController.php(73): App\Service\Http
     }
 
     #[Route('/test-complex-batch', name: 'test-complex-batch', format: 'json')]
-    public function testComplexBatch(HttpClient $httpClient): JsonResponse
+    public function testComplexBatch(): JsonResponse
     {
         /*
 php_1  | Fatal error: Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:176
@@ -104,10 +113,18 @@ php_1  | Stack trace:
 php_1  | #0 /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php(176): curl_multi_add_handle(Object(CurlMultiHandle), Object(CurlHandle))
 php_1  | #1 /var/www/app/vendor/symfony/http-client/CurlHttpClient.php(318): Symfony\Component\HttpClient\Response\CurlResponse->__construct(Object(Symfony\Component\HttpClient\Internal\CurlClientState), Object(CurlHandle), Array, NULL, 'GET', Object(Closure), 479232)
 php_1  | #2 /var/www/app/vendor/symfony/http-client/ScopingHttpClient.php(93): Symfony\Component\HttpClient\CurlHttpClient->request('GET', 'https://httpbin...', Array)
-php_1  | #3 /var/www/app/src/Service/HttpClient.php(25): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
-php_1  | #4 /var/www/app/src/Controller/TestController.php(117): App\Service\HttpClient->get(1)
-php_1  | #5 @swoole-src/library/core/Coroutine/functions.php(37): App\Controller\TestController::App\Controller\{closure}()
+php_1  | #3 /var/www/app/src/Controller/TestController.php(134): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
+php_1  | #4 @swoole-src/library/core/Coroutine/functions.php(37): App\Controller\TestController::App\Controller\{closure}()
+php_1  | #5 {main}
+php_1  |   thrown in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php on line 176
          */
+
+        $httpClient = ScopingHttpClient::forBaseUri(HttpClient::create(), 'https://httpbin.org', [
+            'timeout' => 2,
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
+        ]);
 
         \Swoole\Runtime::enableCoroutine(true, \SWOOLE_HOOK_ALL);
         $startTime = microtime(true);
@@ -115,7 +132,7 @@ php_1  | #5 @swoole-src/library/core/Coroutine/functions.php(37): App\Controller
         $tasks = [];
         foreach ([1, 1, 1, 1] as $delay) {
             $tasks[] = static function () use ($delay, $httpClient) {
-                return $httpClient->get($delay);
+                return $httpClient->request('GET', '/delay/'.$delay)->toArray();
             };
         }
         $results = batch($tasks, 60);
@@ -129,7 +146,7 @@ php_1  | #5 @swoole-src/library/core/Coroutine/functions.php(37): App\Controller
     }
 
     #[Route('/test-simple-http', name: 'test-simple-http', format: 'json')]
-    public function testSimpleHttp(HttpClient $httpClient): JsonResponse
+    public function testSimpleHttp(): JsonResponse
     {
         // swoole hooks for file_get_contents.
         // we must build swoole with support several additions (see Dockerfile)
