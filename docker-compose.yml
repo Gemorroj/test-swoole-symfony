@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: ./.docker/php
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/var/www/app'
+      - '.docker/php/php.ini:/usr/local/etc/php/php.ini'
+    ports:
+      - "8000:8000" # swoole
+    environment:
+      - APP_RUNTIME=Runtime\Swoole\Runtime
