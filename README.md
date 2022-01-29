@@ -3,7 +3,7 @@
 ```bash
 docker-compose up --build --remove-orphans --force-recreate -d
 docker-compose exec php sh
-/composer.phar install
+composer install
 ```
 
 open in browser http://localhost:8000/test-complex
