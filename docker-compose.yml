@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   php:
+    #command: 'composer install --no-interaction --prefer-dist --no-progress --ansi'
     build:
       context: ./.docker/php
       dockerfile: Dockerfile
