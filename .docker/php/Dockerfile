@@ -23,6 +23,17 @@ RUN set -xe \
     && docker-php-ext-install intl \
     && docker-php-ext-enable intl \
 
+    # Yasd
+    && apk add --no-cache boost boost-dev \
+    && docker-php-source extract \
+    && mkdir /usr/src/php/ext/yasd \
+    && curl -sfL https://github.com/swoole/yasd/archive/master.tar.gz -o yasd.tar.gz \
+    && tar xfz yasd.tar.gz --strip-components=1 -C /usr/src/php/ext/yasd \
+    && docker-php-ext-configure yasd \
+    && docker-php-ext-install -j$(nproc) yasd \
+    && rm -f yasd.tar.gz \
+    && docker-php-source delete \
+
     # Swoole https://github.com/swoole/docker-swoole/blob/master/Dockerfile.alpine.twig
     && apk add --no-cache libstdc++ \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev openssl-dev pcre-dev pcre2-dev zlib-dev \
@@ -48,6 +59,6 @@ RUN set -xe \
     && rm -rf /tmp/* /var/cache/apk/*
 
 EXPOSE 8000
-CMD ["php", "/var/www/app/public/index.php"]
+CMD ["php", "-e", "/var/www/app/public/index.php"]
 
 WORKDIR /var/www/app

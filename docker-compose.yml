@@ -11,5 +11,8 @@ services:
       - '.docker/php/php.ini:/usr/local/etc/php/php.ini'
     ports:
       - "8000:8000" # swoole
+    expose:
+      - "9000" # yasd
     environment:
       - APP_RUNTIME=Runtime\Swoole\Runtime
+      - PHP_IDE_CONFIG=serverName=swoole
