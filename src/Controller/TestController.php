@@ -63,14 +63,13 @@ class TestController extends AbstractController
     public function testComplex(): JsonResponse
     {
         /*
-php_1  | PHP Fatal error:  Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:176
-php_1  | Stack trace:
-php_1  | #0 /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php(176): curl_multi_add_handle(Object(CurlMultiHandle), Object(CurlHandle))
-php_1  | #1 /var/www/app/vendor/symfony/http-client/CurlHttpClient.php(318): Symfony\Component\HttpClient\Response\CurlResponse->__construct(Object(Symfony\Component\HttpClient\Internal\CurlClientState), Object(CurlHandle), Array, NULL, 'GET', Object(Closure), 479232)
-php_1  | #2 /var/www/app/vendor/symfony/http-client/ScopingHttpClient.php(93): Symfony\Component\HttpClient\CurlHttpClient->request('GET', 'https://httpbin...', Array)
-php_1  | #3 /var/www/app/src/Controller/TestController.php(91): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
-php_1  | #4 {main}
-php_1  |   thrown in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php on line 176
+test-swoole-symfony-php-1  | 2022-10-21T10:43:45+00:00 [critical] Fatal Error: Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:179
+test-swoole-symfony-php-1  | Stack trace:
+test-swoole-symfony-php-1  | #0 /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php(179): curl_multi_add_handle(Object(CurlMultiHandle), Object(CurlHandle))
+test-swoole-symfony-php-1  | #1 /var/www/app/vendor/symfony/http-client/CurlHttpClient.php(304): Symfony\Component\HttpClient\Response\CurlResponse->__construct(Object(Symfony\Component\HttpClient\Internal\CurlClientState), Object(CurlHandle), Array, NULL, 'GET', Object(Closure), 480001, 'https://httpbin...')
+test-swoole-symfony-php-1  | #2 /var/www/app/vendor/symfony/http-client/ScopingHttpClient.php(93): Symfony\Component\HttpClient\CurlHttpClient->request('GET', 'https://httpbin...', Array)
+test-swoole-symfony-php-1  | #3 /var/www/app/src/Controller/TestController.php(92): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
+test-swoole-symfony-php-1  | #4 [internal function]: App\Controller\TestController->App\Controller\{closure}()
          */
 
         $httpClient = ScopingHttpClient::forBaseUri(HttpClient::create(), 'https://httpbin.org', [
@@ -108,15 +107,14 @@ php_1  |   thrown in /var/www/app/vendor/symfony/http-client/Response/CurlRespon
     public function testComplexBatch(): JsonResponse
     {
         /*
-php_1  | Fatal error: Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:176
-php_1  | Stack trace:
-php_1  | #0 /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php(176): curl_multi_add_handle(Object(CurlMultiHandle), Object(CurlHandle))
-php_1  | #1 /var/www/app/vendor/symfony/http-client/CurlHttpClient.php(318): Symfony\Component\HttpClient\Response\CurlResponse->__construct(Object(Symfony\Component\HttpClient\Internal\CurlClientState), Object(CurlHandle), Array, NULL, 'GET', Object(Closure), 479232)
-php_1  | #2 /var/www/app/vendor/symfony/http-client/ScopingHttpClient.php(93): Symfony\Component\HttpClient\CurlHttpClient->request('GET', 'https://httpbin...', Array)
-php_1  | #3 /var/www/app/src/Controller/TestController.php(134): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
-php_1  | #4 @swoole-src/library/core/Coroutine/functions.php(37): App\Controller\TestController::App\Controller\{closure}()
-php_1  | #5 {main}
-php_1  |   thrown in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php on line 176
+test-swoole-symfony-php-1  | 2022-10-21T10:47:44+00:00 [critical] Fatal Error: Uncaught Swoole\Error: The given object is not a valid coroutine CurlMultiHandle object in /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php:179
+test-swoole-symfony-php-1  | Stack trace:
+test-swoole-symfony-php-1  | #0 /var/www/app/vendor/symfony/http-client/Response/CurlResponse.php(179): curl_multi_add_handle(Object(CurlMultiHandle), Object(CurlHandle))
+test-swoole-symfony-php-1  | #1 /var/www/app/vendor/symfony/http-client/CurlHttpClient.php(304): Symfony\Component\HttpClient\Response\CurlResponse->__construct(Object(Symfony\Component\HttpClient\Internal\CurlClientState), Object(CurlHandle), Array, NULL, 'GET', Object(Closure), 480001, 'https://httpbin...')
+test-swoole-symfony-php-1  | #2 /var/www/app/vendor/symfony/http-client/ScopingHttpClient.php(93): Symfony\Component\HttpClient\CurlHttpClient->request('GET', 'https://httpbin...', Array)
+test-swoole-symfony-php-1  | #3 /var/www/app/src/Controller/TestController.php(134): Symfony\Component\HttpClient\ScopingHttpClient->request('GET', 'https://httpbin...')
+test-swoole-symfony-php-1  | #4 @swoole-src/library/core/Coroutine/functions.php(37): App\Controller\TestController::App\Controller\{closure}()
+test-swoole-symfony-php-1  | #5 [internal function]: Swoole\Coroutine\{closure}()
          */
 
         $httpClient = ScopingHttpClient::forBaseUri(HttpClient::create(), 'https://httpbin.org', [
